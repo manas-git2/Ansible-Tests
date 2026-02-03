@@ -1,0 +1,30 @@
+---
+# tasks file for setup-apache
+  - name: Install Apache package
+    ansible.builtin.package:
+      name: "{{ apache_pkg[ansible_os_family] }}"
+      state: present
+    notify: restart apache
+
+  - name: Modify Apache config
+    ansible.builtin.lineinfile:
+      path: "{{ apache_conf[ansible_os_family] }}"
+      line: "# handler test"
+    notify: restart apache
+
+  - name: Copy custom index.html to Apache web root
+    ansible.builtin.copy:
+      src: /opt/ansible/index.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: '0644'
+    notify: reload apache
+
+  - name: Ensure Apache listens only on configured port
+    ansible.builtin.replace:
+      path: "{{ apache_port_conf[ansible_os_family] }}"
+      regexp: '^Listen\s+\d+'
+      replace: "Listen {{ apache_listen_port }}"
+    notify: restart apache
+

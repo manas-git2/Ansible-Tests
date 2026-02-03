@@ -1,0 +1,65 @@
+---
+- name: Install and start Apache on Ubuntu and RHEL
+  hosts: all
+  become: true
+  vars:
+    apache_pkg:
+      Debian: apache2
+      RedHat: httpd
+    
+    apache_service:
+      Debian: apache2
+      RedHat: httpd
+    
+    apache_conf:
+      Debian: /etc/apache2/apache2.conf
+      RedHat: /etc/httpd/conf/httpd.conf
+    
+    apache_port_conf:
+      Debian: /etc/apache2/ports.conf
+      RedHat: /etc/httpd/conf/httpd.conf
+  
+    apache_listen_port: 8081
+    
+  tasks:
+  - name: Install Apache package
+    ansible.builtin.package:
+      name: "{{ apache_pkg[ansible_os_family] }}"
+      state: present
+    notify: restart apache
+
+  - name: Modify Apache config
+    ansible.builtin.lineinfile:
+      path: "{{ apache_conf[ansible_os_family] }}"
+      line: "# handler test"
+    notify: restart apache
+
+  - name: Copy custom index.html to Apache web root
+    ansible.builtin.copy:
+      src: /opt/ansible/index.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: '0644'
+    notify: reload apache
+ 
+  - name: Ensure the default Apache port is 8081
+    ansible.builtin.lineinfile:
+      path: "{{ apache_port_conf[ansible_os_family] }}"
+      regexp: '^Listen '
+      insertafter: '^#Listen '
+      line: "Listen {{ apache_listen_port }}"
+    notify: restart apache
+
+  handlers:
+  - name: restart apache
+    ansible.builtin.service:
+      name: "{{ apache_service[ansible_os_family] }}"
+      state: restarted
+      enabled: true
+
+  - name: reload apache
+    ansible.builtin.service:
+      name: "{{ apache_service[ansible_os_family] }}"
+      state: reloaded
+   

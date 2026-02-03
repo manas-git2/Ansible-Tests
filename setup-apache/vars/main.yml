@@ -1,0 +1,21 @@
+---
+# vars file for setup-apache
+
+apache_pkg:
+  Debian: apache2
+  RedHat: httpd
+
+apache_service:
+  Debian: apache2
+  RedHat: httpd
+
+apache_conf:
+  Debian: /etc/apache2/apache2.conf
+  RedHat: /etc/httpd/conf/httpd.conf
+
+apache_port_conf:
+  Debian: /etc/apache2/ports.conf
+  RedHat: /etc/httpd/conf/httpd.conf
+
+apache_listen_port: 8081
+

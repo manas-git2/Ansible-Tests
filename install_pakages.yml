@@ -1,0 +1,9 @@
+---
+- name: This playbook install paclakes
+  hosts: appservers
+  become: true
+  tasks:
+  - name: install package
+    apt:
+      name: [ git , make , wget , gzip ] 
+      state: latest

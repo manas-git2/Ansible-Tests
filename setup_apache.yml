@@ -1,0 +1,7 @@
+---
+- name: Install and start Apache on Ubuntu and RHEL
+  hosts: all
+  become: true
+
+  roles:
+    - setup-apache

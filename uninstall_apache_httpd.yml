@@ -1,0 +1,38 @@
+---
+- name: Uninstall Apache Web Server on Ubuntu and RHEL hosts
+  hosts: all
+  become: true
+
+  vars:
+    # Apache package names per OS family
+    apache_pkg:
+      Debian: apache2
+      RedHat: httpd
+
+    # Apache service names per OS family
+    apache_service:
+      Debian: apache2
+      RedHat: httpd
+
+  tasks:
+
+    - name: "[{{ inventory_hostname }}] Stop Apache service if it is running"
+      ansible.builtin.service:
+        name: "{{ apache_service[ansible_os_family] }}"
+        state: stopped
+      ignore_errors: yes
+      tags: stop
+
+    - name: "[{{ inventory_hostname }}] Disable Apache service from starting at boot"
+      ansible.builtin.service:
+        name: "{{ apache_service[ansible_os_family] }}"
+        enabled: false
+      ignore_errors: yes
+      tags: disable
+
+    - name: "[{{ inventory_hostname }}] Remove Apache package from the system"
+      ansible.builtin.package:
+        name: "{{ apache_pkg[ansible_os_family] }}"
+        state: absent
+      tags: uninstall
+
